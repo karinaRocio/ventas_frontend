@@ -1,0 +1,65 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+          <h3>{{ isRegistering ? 'Registro' : 'Iniciar Sesión' }}</h3>
+        </div>
+        <div class="card-body">
+          <!-- Mensaje de error -->
+          <div *ngIf="loginError" class="alert alert-danger">
+            {{ loginError }}
+          </div>
+
+          <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+            <!-- Nombre (solo en registro) -->
+            <div *ngIf="isRegistering" class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" id="nombre" name="nombre" class="form-control"
+                     ngModel required #nombre="ngModel"
+                     [class.is-invalid]="nombre.invalid && nombre.touched">
+              <div *ngIf="nombre.invalid && nombre.touched" class="invalid-feedback">
+                El nombre es obligatorio
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" name="email" class="form-control"
+                     ngModel required email #email="ngModel"
+                     [class.is-invalid]="email.invalid && email.touched">
+              <div *ngIf="email.invalid && email.touched" class="invalid-feedback">
+                <div *ngIf="email.errors?.['required']">El email es obligatorio</div>
+                <div *ngIf="email.errors?.['email']">Email no válido</div>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Contraseña</label>
+              <input type="password" id="password" name="password" class="form-control"
+                     ngModel required minlength="6" #password="ngModel"
+                     [class.is-invalid]="password.invalid && password.touched">
+              <div *ngIf="password.invalid && password.touched" class="invalid-feedback">
+                <div *ngIf="password.errors?.['required']">La contraseña es obligatoria</div>
+                <div *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" 
+                    [disabled]="loginForm.invalid">
+              {{ isRegistering ? 'Registrarse' : 'Iniciar Sesión' }}
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <button class="btn btn-link" (click)="toggleMode()">
+              {{ isRegistering ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
