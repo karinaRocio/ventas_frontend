@@ -1,11 +1,110 @@
+/* Fondo general */
+body {
+  background-color: #f0f2f5;
+}
+
+/* Tarjeta de login */
 .card {
   border-radius: 15px;
   border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
 }
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* Encabezado de la tarjeta */
+.card-header {
+  border-radius: 15px 15px 0 0 !important;
+  padding: 25px 20px;
+}
+
+.card-header h3 {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Campos de formulario */
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #dce1e8;
+  padding: 12px 15px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+/* Botón principal */
+.btn-primary {
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* Botón de alternancia (login/registro) */
 .btn-link {
+  color: #4a90e2;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
+
 .btn-link:hover {
+  color: #357abd;
   text-decoration: underline;
+}
+
+/* Mensajes de error */
+.alert-danger {
+  border-radius: 10px;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 15px;
+}
+
+/* Mensajes de validación */
+.text-danger {
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+/* Logo en el login */
+.login-logo {
+  max-height: 60px;
+  margin-bottom: 10px;
+}
+
+/* Título del sistema */
+.system-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 5px;
+}
+
+.system-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 20px;
 }
