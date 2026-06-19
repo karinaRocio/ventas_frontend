@@ -1,46 +1,39 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { Venta } from '../models/venta';
-import { AuthService } from './auth';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VentaService {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:8081/api/ventas';
-
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-  }
+  private ventas: Venta[] = [];
+  private nextId = 1;
 
   listar(): Observable<Venta[]> {
-    return this.http.get<Venta[]>(this.apiUrl, { headers: this.getHeaders() });
+    return of([...this.ventas]).pipe(delay(300));
   }
 
   crear(venta: Venta): Observable<Venta> {
-    return this.http.post<Venta>(this.apiUrl, venta, { headers: this.getHeaders() });
-  }
-
-  obtener(id: number): Observable<Venta> {
-    return this.http.get<Venta>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+    const nueva = { ...venta, id: this.nextId++, fecha: new Date().toISOString() };
+    this.ventas.push(nueva);
+    return of(nueva).pipe(delay(300));
   }
 
   obtenerResumen(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}/resumen`, { headers: this.getHeaders() });
+    const venta = this.ventas.find(v => v.id === id);
+    return of({
+      ventaId: venta?.id,
+      fecha: venta?.fecha,
+      cliente: venta?.cliente.nombre,
+      cantidadProductos: venta?.detalles.reduce((sum, d) => sum + d.cantidad, 0) || 0,
+      total: venta?.total || 0,
+      estado: venta?.estado
+    }).pipe(delay(300));
   }
 
   getTotalVentas(): Observable<{ total: number }> {
-    return this.http.get<{ total: number }>(`${this.apiUrl}/total-ventas`, { headers: this.getHeaders() });
-  }
-
-  obtenerPorCliente(clienteId: number): Observable<Venta[]> {
-    return this.http.get<Venta[]>(`${this.apiUrl}/cliente/${clienteId}`, { headers: this.getHeaders() });
+    const total = this.ventas.reduce((sum, v) => sum + v.total, 0);
+    return of({ total }).pipe(delay(300));
   }
 }

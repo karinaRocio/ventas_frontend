@@ -1,114 +1,44 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ProductoService } from '../../services/producto';
-import { AuthService } from '../../services/auth';
-import { Producto } from '../../models/producto';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { Producto } from '../models/producto';
 
-@Component({
-  selector: 'app-productos',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './productos.html',
-  styleUrls: ['./productos.css']
+@Injectable({
+  providedIn: 'root'
 })
-export class ProductosComponent implements OnInit {
-  private productoService = inject(ProductoService);
-  public authService = inject(AuthService);   // ← PUBLIC (para usarlo en HTML)
-  private router = inject(Router);
+export class ProductoService {
+  private productos: Producto[] = [
+    { id: 1, nombre: 'Laptop Gamer', precio: 2500, stock: 10 },
+    { id: 2, nombre: 'Mouse Óptico', precio: 50, stock: 50 },
+    { id: 3, nombre: 'Teclado Mecánico', precio: 120, stock: 30 }
+  ];
+  private nextId = 4;
 
-  productos: Producto[] = [];
-  producto: Producto = { nombre: '', precio: 0, stock: 0 };
-  editando: boolean = false;
-  productoId: number | null = null;
-  mensaje: string = '';
+  listar(): Observable<Producto[]> {
+    return of([...this.productos]).pipe(delay(300));
+  }
 
-  ngOnInit(): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-      return;
+  obtener(id: number): Observable<Producto> {
+    const producto = this.productos.find(p => p.id === id);
+    return of({ ...producto! }).pipe(delay(200));
+  }
+
+  crear(producto: Producto): Observable<Producto> {
+    const nuevo = { ...producto, id: this.nextId++ };
+    this.productos.push(nuevo);
+    return of(nuevo).pipe(delay(300));
+  }
+
+  actualizar(id: number, producto: Producto): Observable<Producto> {
+    const index = this.productos.findIndex(p => p.id === id);
+    if (index !== -1) {
+      this.productos[index] = { ...producto, id };
     }
-    this.cargarProductos();
+    return of(this.productos[index]).pipe(delay(300));
   }
 
-  cargarProductos(): void {
-    this.productoService.listar().subscribe({
-      next: (data) => {
-        this.productos = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar productos:', err);
-        if (err.status === 403) {
-          this.router.navigate(['/login']);
-        }
-      }
-    });
-  }
-
-  onSubmit(form: NgForm): void {
-    if (form.invalid) return;
-
-    if (this.editando && this.productoId) {
-      this.productoService.actualizar(this.productoId, this.producto).subscribe({
-        next: () => {
-          this.mensaje = '✅ Producto actualizado';
-          this.cancelarEdicion();
-          this.cargarProductos();
-          setTimeout(() => this.mensaje = '', 3000);
-        },
-        error: (err) => {
-          this.mensaje = '❌ Error al actualizar';
-          console.error(err);
-        }
-      });
-    } else {
-      this.productoService.crear(this.producto).subscribe({
-        next: () => {
-          this.mensaje = '✅ Producto creado';
-          this.producto = { nombre: '', precio: 0, stock: 0 };
-          this.cargarProductos();
-          form.reset();
-          setTimeout(() => this.mensaje = '', 3000);
-        },
-        error: (err) => {
-          this.mensaje = '❌ Error al crear';
-          console.error(err);
-        }
-      });
-    }
-  }
-
-  editar(producto: Producto): void {
-    this.producto = { ...producto };
-    this.editando = true;
-    this.productoId = producto.id || null;
-  }
-
-  eliminar(id: number): void {
-    if (confirm('¿Eliminar este producto?')) {
-      this.productoService.eliminar(id).subscribe({
-        next: () => {
-          this.mensaje = '✅ Producto eliminado';
-          this.cargarProductos();
-          setTimeout(() => this.mensaje = '', 3000);
-        },
-        error: (err) => {
-          this.mensaje = '❌ Error al eliminar';
-          console.error(err);
-        }
-      });
-    }
-  }
-
-  cancelarEdicion(): void {
-    this.editando = false;
-    this.productoId = null;
-    this.producto = { nombre: '', precio: 0, stock: 0 };
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  eliminar(id: number): Observable<void> {
+    this.productos = this.productos.filter(p => p.id !== id);
+    return of(undefined).pipe(delay(300));
   }
 }

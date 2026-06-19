@@ -6,9 +6,9 @@ import { VentasComponent } from './components/ventas/ventas';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent, title: 'Iniciar Sesión' },
-  { path: 'productos', component: ProductosComponent, title: 'Productos' },
-  { path: 'clientes', component: ClientesComponent, title: 'Clientes' },
-  { path: 'ventas', component: VentasComponent, title: 'Ventas' },
-  { path: '**', redirectTo: '/login' }  // Ruta para páginas no encontradas
+  { path: 'login', component: LoginComponent },
+  { path: 'productos', component: ProductosComponent },
+  { path: 'clientes', component: ClientesComponent },
+  { path: 'ventas', component: VentasComponent },
+  { path: '**', redirectTo: '/login' }
 ];

@@ -1,15 +1,15 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  templateUrl: './login.html',
+  styleUrls: ['./login.css']
 })
 export class LoginComponent {
   private authService = inject(AuthService);
@@ -24,27 +24,25 @@ export class LoginComponent {
     const { email, password, nombre } = form.value;
 
     if (this.isRegistering) {
-      // Registro
       this.authService.register({ email, nombre, password }).subscribe({
-        next: (response) => {
-          alert('Usuario registrado exitosamente');
+        next: (response: any) => {
+          alert('✅ ' + response.message);
           this.isRegistering = false;
           form.reset();
         },
-        error: (err) => {
+        error: (err: any) => {
           this.loginError = err.error?.error || 'Error al registrar';
         }
       });
     } else {
-      // Login
       this.authService.login(email, password).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.authService.saveToken(response.token);
           this.authService.saveUser({ email: response.email, nombre: response.nombre });
           this.router.navigate(['/productos']);
         },
-        error: (err) => {
-          this.loginError = err.error?.error || 'Credenciales inválidas';
+        error: (err: any) => {
+          this.loginError = err.error?.error || 'Credenciales inválidas. Usa: test@mail.com / 123456';
         }
       });
     }

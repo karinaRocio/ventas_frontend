@@ -1,24 +1,17 @@
 <div class="container mt-4">
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
       <a class="navbar-brand">🏪 Sistema de Ventas</a>
       <div class="d-flex">
-        <span class="navbar-text text-white me-3">
-          👤 {{ authService.getUser()?.nombre || 'Usuario' }}
-        </span>
+        <span class="navbar-text text-white me-3">👤 {{ authService.getUser()?.nombre || 'Usuario' }}</span>
         <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
   </nav>
 
-  <!-- Mensaje -->
-  <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ mensaje }}
-  </div>
+  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
 
   <div class="row">
-    <!-- Formulario -->
     <div class="col-md-4">
       <div class="card shadow">
         <div class="card-header bg-success text-white">
@@ -28,82 +21,47 @@
           <form #productoForm="ngForm" (ngSubmit)="onSubmit(productoForm)">
             <div class="mb-3">
               <label class="form-label">Nombre</label>
-              <input type="text" name="nombre" class="form-control"
-                     [(ngModel)]="producto.nombre" required #nombre="ngModel"
-                     [class.is-invalid]="nombre.invalid && nombre.touched">
-              <div *ngIf="nombre.invalid && nombre.touched" class="invalid-feedback">
-                El nombre es obligatorio
-              </div>
+              <input type="text" name="nombre" class="form-control" [(ngModel)]="producto.nombre" required>
             </div>
-
             <div class="mb-3">
               <label class="form-label">Precio (S/)</label>
-              <input type="number" name="precio" class="form-control"
-                     [(ngModel)]="producto.precio" required min="0.01" step="0.01"
-                     #precio="ngModel" [class.is-invalid]="precio.invalid && precio.touched">
-              <div *ngIf="precio.invalid && precio.touched" class="invalid-feedback">
-                Precio debe ser mayor a 0
-              </div>
+              <input type="number" name="precio" class="form-control" [(ngModel)]="producto.precio" required min="0.01" step="0.01">
             </div>
-
             <div class="mb-3">
               <label class="form-label">Stock</label>
-              <input type="number" name="stock" class="form-control"
-                     [(ngModel)]="producto.stock" required min="0"
-                     #stock="ngModel" [class.is-invalid]="stock.invalid && stock.touched">
-              <div *ngIf="stock.invalid && stock.touched" class="invalid-feedback">
-                Stock no puede ser negativo
-              </div>
+              <input type="number" name="stock" class="form-control" [(ngModel)]="producto.stock" required min="0">
             </div>
-
             <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-success w-100" 
-                      [disabled]="productoForm.invalid">
+              <button type="submit" class="btn btn-success w-100" [disabled]="productoForm.invalid">
                 {{ editando ? 'Actualizar' : 'Guardar' }}
               </button>
-              <button *ngIf="editando" type="button" class="btn btn-secondary"
-                      (click)="cancelarEdicion()">Cancelar</button>
+              <button *ngIf="editando" type="button" class="btn btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Lista -->
     <div class="col-md-8">
       <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h5>📦 Lista de Productos</h5>
-        </div>
+        <div class="card-header bg-primary text-white"><h5>📦 Lista de Productos</h5></div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Precio</th>
-                  <th>Stock</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let p of productos">
-                  <td>{{ p.id }}</td>
-                  <td>{{ p.nombre }}</td>
-                  <td>S/ {{ p.precio | number:'1.2-2' }}</td>
-                  <td>{{ p.stock }}</td>
-                  <td>
-                    <button class="btn btn-warning btn-sm me-1" (click)="editar(p)">✏️</button>
-                    <button class="btn btn-danger btn-sm" (click)="eliminar(p.id!)">🗑️</button>
-                  </td>
-                </tr>
-                <tr *ngIf="productos.length === 0">
-                  <td colspan="5" class="text-center">No hay productos registrados</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table class="table table-striped">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of productos">
+                <td>{{ p.id }}</td>
+                <td>{{ p.nombre }}</td>
+                <td>S/ {{ p.precio | number:'1.2-2' }}</td>
+                <td>{{ p.stock }}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm me-1" (click)="editar(p)">✏️</button>
+                  <button class="btn btn-danger btn-sm" (click)="eliminar(p.id!)">🗑️</button>
+                </td>
+              </tr>
+              <tr *ngIf="productos.length === 0"><td colspan="5" class="text-center">No hay productos</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

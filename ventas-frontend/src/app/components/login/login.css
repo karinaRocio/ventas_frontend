@@ -2,12 +2,10 @@
   border-radius: 15px;
   border: none;
 }
-
 .btn-link {
   text-decoration: none;
   font-size: 0.9rem;
 }
-
 .btn-link:hover {
   text-decoration: underline;
 }

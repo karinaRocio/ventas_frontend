@@ -16,5 +16,4 @@ export interface Venta {
   total: number;
   estado: string;
   detalles: DetalleVenta[];
-  createdAt?: string;
 }

@@ -10,12 +10,12 @@ import { Cliente } from '../../models/cliente';
   selector: 'app-clientes',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './clientes.component.html',
-  styleUrls: ['./clientes.component.css']
+  templateUrl: './clientes.html',
+  styleUrls: ['./clientes.css']
 })
 export class ClientesComponent implements OnInit {
   private clienteService = inject(ClienteService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private router = inject(Router);
 
   clientes: Cliente[] = [];
@@ -32,32 +32,35 @@ export class ClientesComponent implements OnInit {
 
   cargarClientes(): void {
     this.clienteService.listar().subscribe({
-      next: (data) => {
+      next: (data: Cliente[]) => {
         this.clientes = data;
+        console.log('Clientes cargados:', data);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar clientes:', err);
-        if (err.status === 403) {
-          this.router.navigate(['/login']);
-        }
       }
     });
   }
 
   onSubmit(form: NgForm): void {
-    if (form.invalid) return;
+    if (form.invalid) {
+      this.mensaje = '❌ Complete todos los campos';
+      return;
+    }
+
+    console.log('Guardando cliente:', this.cliente);
 
     this.clienteService.crear(this.cliente).subscribe({
-      next: () => {
-        this.mensaje = '✅ Cliente creado';
+      next: (nuevoCliente: Cliente) => {
+        this.mensaje = '✅ Cliente creado exitosamente!';
         this.cliente = { nombre: '', email: '', telefono: '', direccion: '' };
         this.cargarClientes();
         form.reset();
         setTimeout(() => this.mensaje = '', 3000);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.mensaje = '❌ Error al crear cliente';
-        console.error(err);
+        console.error('Error:', err);
       }
     });
   }

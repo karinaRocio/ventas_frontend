@@ -10,12 +10,12 @@ import { Producto } from '../../models/producto';
   selector: 'app-productos',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './productos.html',      
-  styleUrls: ['./productos.css']       
+  templateUrl: './productos.html',
+  styleUrls: ['./productos.css']
 })
 export class ProductosComponent implements OnInit {
   private productoService = inject(ProductoService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private router = inject(Router);
 
   productos: Producto[] = [];
@@ -34,15 +34,8 @@ export class ProductosComponent implements OnInit {
 
   cargarProductos(): void {
     this.productoService.listar().subscribe({
-      next: (data) => {
-        this.productos = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar productos:', err);
-        if (err.status === 403) {
-          this.router.navigate(['/login']);
-        }
-      }
+      next: (data: Producto[]) => { this.productos = data; },
+      error: (err: any) => { console.error(err); }
     });
   }
 
@@ -57,10 +50,7 @@ export class ProductosComponent implements OnInit {
           this.cargarProductos();
           setTimeout(() => this.mensaje = '', 3000);
         },
-        error: (err) => {
-          this.mensaje = '❌ Error al actualizar';
-          console.error(err);
-        }
+        error: (err: any) => { this.mensaje = '❌ Error al actualizar'; }
       });
     } else {
       this.productoService.crear(this.producto).subscribe({
@@ -71,10 +61,7 @@ export class ProductosComponent implements OnInit {
           form.reset();
           setTimeout(() => this.mensaje = '', 3000);
         },
-        error: (err) => {
-          this.mensaje = '❌ Error al crear';
-          console.error(err);
-        }
+        error: (err: any) => { this.mensaje = '❌ Error al crear'; }
       });
     }
   }
@@ -93,10 +80,7 @@ export class ProductosComponent implements OnInit {
           this.cargarProductos();
           setTimeout(() => this.mensaje = '', 3000);
         },
-        error: (err) => {
-          this.mensaje = '❌ Error al eliminar';
-          console.error(err);
-        }
+        error: (err: any) => { this.mensaje = '❌ Error al eliminar'; }
       });
     }
   }

@@ -1,30 +1,25 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { Cliente } from '../models/cliente';
-import { AuthService } from './auth';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClienteService {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:8081/api/clientes';
-
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-  }
+  private clientes: Cliente[] = [
+    { id: 1, nombre: 'Juan Pérez', email: 'juan@email.com', telefono: '999888777', direccion: 'Av. Principal 123' },
+    { id: 2, nombre: 'María López', email: 'maria@email.com', telefono: '988777666', direccion: 'Calle Los Olivos 456' }
+  ];
+  private nextId = 3;
 
   listar(): Observable<Cliente[]> {
-    return this.http.get<Cliente[]>(this.apiUrl, { headers: this.getHeaders() });
+    return of([...this.clientes]).pipe(delay(300));
   }
 
   crear(cliente: Cliente): Observable<Cliente> {
-    return this.http.post<Cliente>(this.apiUrl, cliente, { headers: this.getHeaders() });
+    const nuevo = { ...cliente, id: this.nextId++ };
+    this.clientes.push(nuevo);
+    return of(nuevo).pipe(delay(300));
   }
 }

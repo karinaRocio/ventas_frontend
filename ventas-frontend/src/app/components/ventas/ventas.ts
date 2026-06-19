@@ -14,14 +14,14 @@ import { Producto } from '../../models/producto';
   selector: 'app-ventas',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './ventas.component.html',
-  styleUrls: ['./ventas.component.css']
+  templateUrl: './ventas.html',
+  styleUrls: ['./ventas.css']
 })
 export class VentasComponent implements OnInit {
   private ventaService = inject(VentaService);
   private clienteService = inject(ClienteService);
   private productoService = inject(ProductoService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private router = inject(Router);
 
   ventas: Venta[] = [];
@@ -43,10 +43,13 @@ export class VentasComponent implements OnInit {
   mensaje: string = '';
 
   ngOnInit(): void {
+    // Verificar autenticación
     if (!this.authService.isAuthenticated()) {
+      console.log('No autenticado, redirigiendo a login');
       this.router.navigate(['/login']);
       return;
     }
+    console.log('Autenticado, cargando datos de ventas');
     this.cargarDatos();
   }
 
@@ -59,57 +62,48 @@ export class VentasComponent implements OnInit {
 
   cargarVentas(): void {
     this.ventaService.listar().subscribe({
-      next: (data) => {
+      next: (data: Venta[]) => {
         this.ventas = data;
+        console.log('Ventas cargadas:', data);
       },
-      error: (err) => {
-        console.error('Error al cargar ventas:', err);
-      }
+      error: (err: any) => console.error('Error al cargar ventas:', err)
     });
   }
 
   cargarClientes(): void {
     this.clienteService.listar().subscribe({
-      next: (data) => {
+      next: (data: Cliente[]) => {
         this.clientes = data;
+        console.log('Clientes cargados:', data);
       },
-      error: (err) => {
-        console.error('Error al cargar clientes:', err);
-      }
+      error: (err: any) => console.error('Error al cargar clientes:', err)
     });
   }
 
   cargarProductos(): void {
     this.productoService.listar().subscribe({
-      next: (data) => {
+      next: (data: Producto[]) => {
         this.productos = data;
+        console.log('Productos cargados:', data);
       },
-      error: (err) => {
-        console.error('Error al cargar productos:', err);
-      }
+      error: (err: any) => console.error('Error al cargar productos:', err)
     });
   }
 
   calcularTotalVentas(): void {
     this.ventaService.getTotalVentas().subscribe({
-      next: (data) => {
-        this.totalVentas = data.total;
-      },
-      error: (err) => {
-        console.error('Error al calcular total:', err);
-      }
+      next: (data: any) => { this.totalVentas = data.total; },
+      error: (err: any) => console.error(err)
     });
   }
 
   verResumen(id: number): void {
     this.ventaService.obtenerResumen(id).subscribe({
-      next: (data) => {
+      next: (data: any) => {
         this.resumen = data;
         setTimeout(() => this.resumen = null, 5000);
       },
-      error: (err) => {
-        console.error('Error al obtener resumen:', err);
-      }
+      error: (err: any) => console.error(err)
     });
   }
 
@@ -126,8 +120,6 @@ export class VentasComponent implements OnInit {
 
     this.venta.detalles.push(detalle);
     this.venta.total = this.venta.detalles.reduce((sum, d) => sum + d.subtotal, 0);
-    
-    // Resetear selección
     this.productoSeleccionado = 0;
     this.cantidadDetalle = 1;
   }
@@ -156,9 +148,8 @@ export class VentasComponent implements OnInit {
 
     this.venta.cliente = cliente;
 
-    // Enviar la venta al backend
     this.ventaService.crear(this.venta).subscribe({
-      next: (response) => {
+      next: () => {
         this.mensaje = '✅ Venta creada exitosamente!';
         this.venta = {
           cliente: { nombre: '', email: '', telefono: '', direccion: '' },
@@ -171,9 +162,9 @@ export class VentasComponent implements OnInit {
         form.reset();
         setTimeout(() => this.mensaje = '', 3000);
       },
-      error: (err) => {
-        this.mensaje = '❌ Error al crear la venta: ' + (err.error?.error || err.message);
-        console.error('Error:', err);
+      error: (err: any) => {
+        this.mensaje = '❌ Error al crear la venta';
+        console.error(err);
       }
     });
   }
