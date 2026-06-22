@@ -23,8 +23,11 @@ export class ProductosComponent implements OnInit {
   editando: boolean = false;
   productoId: number | null = null;
   mensaje: string = '';
+  mostrarModal: boolean = false;
 
   ngOnInit(): void {
+    console.log('🔄 ProductosComponent inicializado'); // ← PARA DEPURAR
+    
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
@@ -33,10 +36,37 @@ export class ProductosComponent implements OnInit {
   }
 
   cargarProductos(): void {
+    console.log('📦 Cargando productos...'); // ← PARA DEPURAR
+    
     this.productoService.listar().subscribe({
-      next: (data: Producto[]) => { this.productos = data; },
-      error: (err: any) => { console.error(err); }
+      next: (data: Producto[]) => {
+        console.log('✅ Productos recibidos:', data); // ← PARA DEPURAR
+        this.productos = data;
+      },
+      error: (err: any) => {
+        console.error('❌ Error al cargar productos:', err); // ← PARA DEPURAR
+      }
     });
+  }
+
+  abrirModal(): void {
+    this.editando = false;
+    this.producto = { nombre: '', precio: 0, stock: 0 };
+    this.mostrarModal = true;
+  }
+
+  editar(producto: Producto): void {
+    this.producto = { ...producto };
+    this.editando = true;
+    this.productoId = producto.id || null;
+    this.mostrarModal = true;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.producto = { nombre: '', precio: 0, stock: 0 };
+    this.editando = false;
+    this.productoId = null;
   }
 
   onSubmit(form: NgForm): void {
@@ -46,7 +76,7 @@ export class ProductosComponent implements OnInit {
       this.productoService.actualizar(this.productoId, this.producto).subscribe({
         next: () => {
           this.mensaje = '✅ Producto actualizado';
-          this.cancelarEdicion();
+          this.cerrarModal();
           this.cargarProductos();
           setTimeout(() => this.mensaje = '', 3000);
         },
@@ -56,20 +86,13 @@ export class ProductosComponent implements OnInit {
       this.productoService.crear(this.producto).subscribe({
         next: () => {
           this.mensaje = '✅ Producto creado';
-          this.producto = { nombre: '', precio: 0, stock: 0 };
+          this.cerrarModal();
           this.cargarProductos();
-          form.reset();
           setTimeout(() => this.mensaje = '', 3000);
         },
         error: (err: any) => { this.mensaje = '❌ Error al crear'; }
       });
     }
-  }
-
-  editar(producto: Producto): void {
-    this.producto = { ...producto };
-    this.editando = true;
-    this.productoId = producto.id || null;
   }
 
   eliminar(id: number): void {
@@ -85,10 +108,8 @@ export class ProductosComponent implements OnInit {
     }
   }
 
-  cancelarEdicion(): void {
-    this.editando = false;
-    this.productoId = null;
-    this.producto = { nombre: '', precio: 0, stock: 0 };
+  agregarAlCarrito(producto: Producto): void {
+    alert(`🛒 ${producto.nombre} agregado al carrito!`);
   }
 
   logout(): void {

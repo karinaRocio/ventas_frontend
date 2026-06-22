@@ -43,13 +43,10 @@ export class VentasComponent implements OnInit {
   mensaje: string = '';
 
   ngOnInit(): void {
-    // Verificar autenticación
     if (!this.authService.isAuthenticated()) {
-      console.log('No autenticado, redirigiendo a login');
       this.router.navigate(['/login']);
       return;
     }
-    console.log('Autenticado, cargando datos de ventas');
     this.cargarDatos();
   }
 
@@ -64,7 +61,7 @@ export class VentasComponent implements OnInit {
     this.ventaService.listar().subscribe({
       next: (data: Venta[]) => {
         this.ventas = data;
-        console.log('Ventas cargadas:', data);
+        console.log('📋 Ventas cargadas:', data);
       },
       error: (err: any) => console.error('Error al cargar ventas:', err)
     });
@@ -74,25 +71,28 @@ export class VentasComponent implements OnInit {
     this.clienteService.listar().subscribe({
       next: (data: Cliente[]) => {
         this.clientes = data;
-        console.log('Clientes cargados:', data);
+        console.log('👥 Clientes cargados:', data);
       },
       error: (err: any) => console.error('Error al cargar clientes:', err)
     });
   }
 
   cargarProductos(): void {
+    console.log('📦 Cargando productos...');
     this.productoService.listar().subscribe({
       next: (data: Producto[]) => {
         this.productos = data;
-        console.log('Productos cargados:', data);
+        console.log('✅ Productos cargados en ventas:', this.productos);
       },
-      error: (err: any) => console.error('Error al cargar productos:', err)
+      error: (err: any) => console.error('❌ Error al cargar productos:', err)
     });
   }
 
   calcularTotalVentas(): void {
     this.ventaService.getTotalVentas().subscribe({
-      next: (data: any) => { this.totalVentas = data.total; },
+      next: (data: any) => {
+        this.totalVentas = data.total;
+      },
       error: (err: any) => console.error(err)
     });
   }
@@ -108,8 +108,39 @@ export class VentasComponent implements OnInit {
   }
 
   agregarDetalle(): void {
-    const producto = this.productos.find(p => p.id === this.productoSeleccionado);
-    if (!producto) return;
+    console.log('🔍 Intentando agregar detalle...');
+    console.log('Producto seleccionado ID:', this.productoSeleccionado);
+    console.log('Productos disponibles:', this.productos);
+
+    if (this.productoSeleccionado === 0) {
+      this.mensaje = '⚠️ Seleccione un producto';
+      setTimeout(() => this.mensaje = '', 3000);
+      return;
+    }
+
+    const idProducto = Number(this.productoSeleccionado);
+    const producto = this.productos.find(p => p.id === idProducto);
+    
+    if (!producto) {
+      console.warn('⚠️ Producto no encontrado con ID:', idProducto);
+      this.mensaje = '❌ Producto no encontrado';
+      setTimeout(() => this.mensaje = '', 3000);
+      return;
+    }
+
+    console.log('✅ Producto encontrado:', producto);
+
+    if (this.cantidadDetalle < 1) {
+      this.mensaje = '⚠️ La cantidad debe ser mayor a 0';
+      setTimeout(() => this.mensaje = '', 3000);
+      return;
+    }
+
+    if (producto.stock < this.cantidadDetalle) {
+      this.mensaje = `⚠️ Stock insuficiente. Disponible: ${producto.stock}`;
+      setTimeout(() => this.mensaje = '', 3000);
+      return;
+    }
 
     const detalle: DetalleVenta = {
       producto: producto,
@@ -120,37 +151,72 @@ export class VentasComponent implements OnInit {
 
     this.venta.detalles.push(detalle);
     this.venta.total = this.venta.detalles.reduce((sum, d) => sum + d.subtotal, 0);
+
+    console.log('📋 Detalles actuales:', this.venta.detalles);
+    console.log('💰 Total venta:', this.venta.total);
+
     this.productoSeleccionado = 0;
     this.cantidadDetalle = 1;
+    
+    this.mensaje = `✅ Producto agregado: ${producto.nombre}`;
+    setTimeout(() => this.mensaje = '', 2000);
   }
 
   eliminarDetalle(index: number): void {
     this.venta.detalles.splice(index, 1);
     this.venta.total = this.venta.detalles.reduce((sum, d) => sum + d.subtotal, 0);
+    this.mensaje = '🗑️ Producto eliminado';
+    setTimeout(() => this.mensaje = '', 2000);
   }
 
   onSubmit(form: NgForm): void {
+    console.log('📝 Enviando formulario...');
+    console.log('Cliente seleccionado ID:', this.clienteSeleccionado);
+    console.log('Clientes disponibles:', this.clientes);
+
     if (form.invalid) {
-      this.mensaje = '❌ Complete todos los campos';
+      this.mensaje = '⚠️ Complete todos los campos';
+      setTimeout(() => this.mensaje = '', 3000);
       return;
     }
 
     if (this.venta.detalles.length === 0) {
-      this.mensaje = '❌ Agregue al menos un producto';
+      this.mensaje = '⚠️ Agregue al menos un producto';
+      setTimeout(() => this.mensaje = '', 3000);
       return;
     }
 
-    const cliente = this.clientes.find(c => c.id === this.clienteSeleccionado);
+    if (this.clienteSeleccionado === 0) {
+      this.mensaje = '⚠️ Seleccione un cliente';
+      setTimeout(() => this.mensaje = '', 3000);
+      return;
+    }
+
+    // ✅ CONVERTIR A NUMBER PARA COMPARAR CORRECTAMENTE
+    const idCliente = Number(this.clienteSeleccionado);
+    
+    // Buscar el cliente seleccionado
+    const cliente = this.clientes.find(c => c.id === idCliente);
+    
     if (!cliente) {
-      this.mensaje = '❌ Seleccione un cliente';
+      console.warn('⚠️ Cliente no encontrado con ID:', idCliente);
+      console.log('IDs disponibles:', this.clientes.map(c => c.id));
+      this.mensaje = '❌ Cliente no encontrado. Seleccione un cliente válido.';
+      setTimeout(() => this.mensaje = '', 3000);
       return;
     }
 
+    console.log('✅ Cliente encontrado:', cliente);
+
+    // Asignar el cliente a la venta
     this.venta.cliente = cliente;
 
+    // Registrar la venta
     this.ventaService.crear(this.venta).subscribe({
-      next: () => {
-        this.mensaje = '✅ Venta creada exitosamente!';
+      next: (nuevaVenta: Venta) => {
+        this.mensaje = `✅ Venta #${nuevaVenta.id} registrada! Total: S/ ${nuevaVenta.total}`;
+        
+        // Resetear formulario
         this.venta = {
           cliente: { nombre: '', email: '', telefono: '', direccion: '' },
           total: 0,
@@ -160,7 +226,7 @@ export class VentasComponent implements OnInit {
         this.clienteSeleccionado = 0;
         this.cargarDatos();
         form.reset();
-        setTimeout(() => this.mensaje = '', 3000);
+        setTimeout(() => this.mensaje = '', 4000);
       },
       error: (err: any) => {
         this.mensaje = '❌ Error al crear la venta';

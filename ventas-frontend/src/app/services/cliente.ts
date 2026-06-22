@@ -9,11 +9,13 @@ import { Cliente } from '../models/cliente';
 export class ClienteService {
   private clientes: Cliente[] = [
     { id: 1, nombre: 'Juan Pérez', email: 'juan@email.com', telefono: '999888777', direccion: 'Av. Principal 123' },
-    { id: 2, nombre: 'María López', email: 'maria@email.com', telefono: '988777666', direccion: 'Calle Los Olivos 456' }
+    { id: 2, nombre: 'María López', email: 'maria@email.com', telefono: '988777666', direccion: 'Calle Los Olivos 456' },
+    { id: 3, nombre: 'Carlos Gómez', email: 'carlos@email.com', telefono: '977666555', direccion: 'Jr. Las Flores 789' }
   ];
-  private nextId = 3;
+  private nextId = 4;
 
   listar(): Observable<Cliente[]> {
+    console.log('👤 ClienteService.listar() - Enviando clientes:', this.clientes);
     return of([...this.clientes]).pipe(delay(300));
   }
 

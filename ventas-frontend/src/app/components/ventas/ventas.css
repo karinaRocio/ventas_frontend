@@ -1,3 +1,66 @@
-.card { border-radius: 12px; border: none; }
-.list-group-item { cursor: pointer; transition: background 0.2s; }
-.list-group-item:hover { background-color: #f0f0f0; }
+.card {
+  border-radius: 12px;
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.table th {
+  background-color: #f8f9fa;
+}
+
+.form-select, .form-control {
+  border-radius: 8px;
+  border: 1px solid #dce1e8;
+}
+
+.form-select:focus, .form-control:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  border: none;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(17,153,142,0.4);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  border: none;
+}
+
+.btn-danger:hover {
+  transform: scale(1.05);
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+}

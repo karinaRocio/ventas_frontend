@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
-      <a class="navbar-brand">🏪 Sistema de Ventas</a>
+      <a class="navbar-brand">💰 Sistema de Ventas</a>
       <div class="d-flex">
         <span class="navbar-text text-white me-3">👤 {{ authService.getUser()?.nombre || 'Usuario' }}</span>
         <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
@@ -9,85 +9,136 @@
     </div>
   </nav>
 
-  <h2>💰 Gestión de Ventas</h2>
-  <p>Bienvenido a la sección de ventas</p>
-  <div class="alert alert-info">
-    <strong>Funcionalidad:</strong> Aquí se listarán y crearán ventas.
+  <!-- Mensajes -->
+  <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show">
+    {{ mensaje }}
+    <button type="button" class="btn-close" (click)="mensaje = ''"></button>
   </div>
 
-  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+  <div class="row">
+    <!-- Formulario de Venta -->
+    <div class="col-md-7">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">➕ Nueva Venta</h5>
+        </div>
+        <div class="card-body">
+          <form #ventaForm="ngForm" (ngSubmit)="onSubmit(ventaForm)">
+            <!-- Cliente -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">👤 Cliente</label>
+              <select class="form-select" [(ngModel)]="clienteSeleccionado" name="cliente" required>
+                <option value="0">-- Seleccionar cliente --</option>
+                <option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }} - {{ c.email }}</option>
+              </select>
+            </div>
 
-  <!-- Formulario de venta -->
-  <div class="card shadow">
-    <div class="card-header bg-success text-white">
-      <h5>➕ Nueva Venta</h5>
+            <!-- Producto -->
+            <div class="row g-3 align-items-end">
+              <div class="col-md-5">
+                <label class="form-label fw-bold">📦 Producto</label>
+                <select class="form-select" [(ngModel)]="productoSeleccionado" name="producto">
+                  <option value="0">-- Seleccionar producto --</option>
+                  <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} - S/ {{ p.precio | number:'1.2-2' }}</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold">🔢 Cantidad</label>
+                <input type="number" class="form-control" [(ngModel)]="cantidadDetalle" name="cantidad" min="1" value="1">
+              </div>
+              <div class="col-md-4">
+                <button type="button" class="btn btn-primary w-100" (click)="agregarDetalle()"
+                        [disabled]="productoSeleccionado === 0">
+                  <i class="bi bi-plus-circle"></i> Agregar
+                </button>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Detalles -->
+            <h6 class="fw-bold">📋 Detalles de la Venta</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Subtotal</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let d of venta.detalles; let i = index">
+                    <td>{{ d.producto.nombre }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td>S/ {{ d.precioUnitario | number:'1.2-2' }}</td>
+                    <td>S/ {{ d.subtotal | number:'1.2-2' }}</td>
+                    <td>
+                      <button class="btn btn-danger btn-sm" (click)="eliminarDetalle(i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="venta.detalles.length === 0">
+                    <td colspan="5" class="text-center text-muted py-3">
+                      <i class="bi bi-cart"></i> Sin productos agregados
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot *ngIf="venta.detalles.length > 0">
+                  <tr class="table-success">
+                    <td colspan="3" class="text-end fw-bold">TOTAL:</td>
+                    <td colspan="2" class="fw-bold">S/ {{ venta.total | number:'1.2-2' }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 mt-3"
+                    [disabled]="ventaForm.invalid || venta.detalles.length === 0 || clienteSeleccionado === 0">
+              <i class="bi bi-check-circle"></i> Registrar Venta
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <form #ventaForm="ngForm" (ngSubmit)="onSubmit(ventaForm)">
-        <!-- Cliente -->
-        <div class="mb-3">
-          <label class="form-label">Cliente</label>
-          <select class="form-select" [(ngModel)]="clienteSeleccionado" name="cliente" required>
-            <option value="0">Seleccionar cliente...</option>
-            <option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }} - {{ c.email }}</option>
-          </select>
+
+    <!-- Panel derecho -->
+    <div class="col-md-5">
+      <!-- Total Ventas -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">💰 Total de Ventas</h5>
         </div>
+        <div class="card-body text-center py-4">
+          <h2 class="display-4 text-primary">S/ {{ totalVentas | number:'1.2-2' }}</h2>
+        </div>
+      </div>
 
-        <!-- Producto -->
-        <div class="row">
-          <div class="col-md-6">
-            <label class="form-label">Producto</label>
-            <select class="form-select" [(ngModel)]="productoSeleccionado" name="producto">
-              <option value="0">Seleccionar producto...</option>
-              <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} - S/ {{ p.precio }}</option>
-            </select>
+      <!-- Ventas Recientes -->
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">📋 Ventas Recientes</h5>
+        </div>
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+          <div *ngIf="ventas.length === 0" class="text-center text-muted py-3">
+            No hay ventas registradas
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Cantidad</label>
-            <input type="number" class="form-control" [(ngModel)]="cantidadDetalle" name="cantidad" min="1">
-          </div>
-          <div class="col-md-3 d-flex align-items-end">
-            <button type="button" class="btn btn-primary" (click)="agregarDetalle()">Agregar</button>
+          <div *ngFor="let v of ventas | slice:-5" class="d-flex justify-content-between border-bottom py-2">
+            <div>
+              <strong>#{{ v.id }}</strong>
+              <span class="badge bg-success ms-2">{{ v.estado }}</span>
+              <div class="small text-muted">{{ v.cliente.nombre }}</div>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold">S/ {{ v.total | number:'1.2-2' }}</div>
+              <small class="text-muted">{{ v.fecha | date:'dd/MM/yyyy' }}</small>
+            </div>
           </div>
         </div>
-
-        <hr>
-        <h6>Detalles de la Venta</h6>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-              <th>Subtotal</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let d of venta.detalles; let i = index">
-              <td>{{ d.producto.nombre }}</td>
-              <td>{{ d.cantidad }}</td>
-              <td>S/ {{ d.precioUnitario | number:'1.2-2' }}</td>
-              <td>S/ {{ d.subtotal | number:'1.2-2' }}</td>
-              <td><button class="btn btn-danger btn-sm" (click)="eliminarDetalle(i)">X</button></td>
-            </tr>
-            <tr *ngIf="venta.detalles.length === 0">
-              <td colspan="5" class="text-center">Sin productos agregados</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="text-end"><strong>Total:</strong></td>
-              <td><strong>S/ {{ venta.total | number:'1.2-2' }}</strong></td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <button type="submit" class="btn btn-success w-100" [disabled]="ventaForm.invalid || venta.detalles.length === 0">
-          Registrar Venta
-        </button>
-      </form>
+      </div>
     </div>
   </div>
 </div>

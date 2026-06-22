@@ -1,4 +1,5 @@
 <div class="container mt-4">
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container-fluid">
       <a class="navbar-brand">🏪 Sistema de Ventas</a>
@@ -9,61 +10,116 @@
     </div>
   </nav>
 
-  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+  <!-- MENSAJE -->
+  <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show">
+    {{ mensaje }}
+    <button type="button" class="btn-close" (click)="mensaje = ''"></button>
+  </div>
 
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          <h5>{{ editando ? '✏️ Editar Producto' : '➕ Nuevo Producto' }}</h5>
-        </div>
-        <div class="card-body">
-          <form #productoForm="ngForm" (ngSubmit)="onSubmit(productoForm)">
-            <div class="mb-3">
-              <label class="form-label">Nombre</label>
-              <input type="text" name="nombre" class="form-control" [(ngModel)]="producto.nombre" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Precio (S/)</label>
-              <input type="number" name="precio" class="form-control" [(ngModel)]="producto.precio" required min="0.01" step="0.01">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Stock</label>
-              <input type="number" name="stock" class="form-control" [(ngModel)]="producto.stock" required min="0">
-            </div>
-            <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-success w-100" [disabled]="productoForm.invalid">
-                {{ editando ? 'Actualizar' : 'Guardar' }}
-              </button>
-              <button *ngIf="editando" type="button" class="btn btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
-            </div>
-          </form>
-        </div>
+  <!-- BOTÓN AGREGAR -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📦 Lista de Productos</h2>
+    <button class="btn btn-success" (click)="abrirModal()">
+      <i class="bi bi-plus-circle"></i> Nuevo Producto
+    </button>
+  </div>
+
+  <!-- TABLA DE PRODUCTOS -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ✅ PRODUCTOS DINÁMICOS -->
+            <tr *ngFor="let p of productos">
+              <td><strong>#{{ p.id }}</strong></td>
+              <td>{{ p.nombre }}</td>
+              <td><span class="fw-bold text-success">S/ {{ p.precio | number:'1.2-2' }}</span></td>
+              <td>
+                <span class="badge" [ngClass]="p.stock > 10 ? 'bg-success' : p.stock > 5 ? 'bg-warning' : 'bg-danger'">
+                  {{ p.stock }}
+                </span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-warning btn-sm me-1" (click)="editar(p)" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="eliminar(p.id!)" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <!-- MENSAJE DE PRODUCTOS VACÍOS -->
+            <tr *ngIf="productos.length === 0">
+              <td colspan="5" class="text-center py-4 text-muted">
+                <i class="bi bi-box-seam" style="font-size: 2rem;"></i><br>
+                No hay productos disponibles
+              </td>
+            </tr>
+            <!-- CONTADOR DE PRODUCTOS -->
+            <tr *ngIf="productos.length > 0">
+              <td colspan="5" class="text-end text-muted">
+                <small>Total: {{ productos.length }} productos</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="col-md-8">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white"><h5>📦 Lista de Productos</h5></div>
-        <div class="card-body">
-          <table class="table table-striped">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let p of productos">
-                <td>{{ p.id }}</td>
-                <td>{{ p.nombre }}</td>
-                <td>S/ {{ p.precio | number:'1.2-2' }}</td>
-                <td>{{ p.stock }}</td>
-                <td>
-                  <button class="btn btn-warning btn-sm me-1" (click)="editar(p)">✏️</button>
-                  <button class="btn btn-danger btn-sm" (click)="eliminar(p.id!)">🗑️</button>
-                </td>
-              </tr>
-              <tr *ngIf="productos.length === 0"><td colspan="5" class="text-center">No hay productos</td></tr>
-            </tbody>
-          </table>
+<!-- ✅ MODAL PARA CREAR/EDITAR PRODUCTOS -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4 class="modal-title">{{ editando ? '✏️ Editar Producto' : '➕ Nuevo Producto' }}</h4>
+      <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+    </div>
+    <div class="modal-body">
+      <form #productoForm="ngForm" (ngSubmit)="onSubmit(productoForm)">
+        <!-- NOMBRE -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Nombre del producto</label>
+          <input type="text" class="form-control" [(ngModel)]="producto.nombre" name="nombre" required
+                 placeholder="Ej: Laptop Gamer">
         </div>
-      </div>
+
+        <!-- PRECIO Y STOCK -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Precio (S/)</label>
+              <input type="number" class="form-control" [(ngModel)]="producto.precio" name="precio" 
+                     required min="0.01" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Stock</label>
+              <input type="number" class="form-control" [(ngModel)]="producto.stock" name="stock" 
+                     required min="0" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTONES DEL MODAL -->
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="productoForm.invalid">
+            {{ editando ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
